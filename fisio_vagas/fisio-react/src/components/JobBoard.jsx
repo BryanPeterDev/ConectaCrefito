@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   MapPin,
   Briefcase,
@@ -8,43 +8,99 @@ import {
 
 // Mapeia os campos da API real para o formato de exibição
 function normalizeJob(job) {
+  if (!job) return { id: Math.random() };
   return {
     id: job.id,
-    title: job.titulo,
-    company: job.ofertante?.nome || "Clínica/Empresa",
-    location: job.local || "Brasília, DF",
+    title: job.titulo || "Sem título",
+    company: job.ofertante?.nome || job.empresa || "Clínica/Empresa",
+    location: job.local || "Local não informado",
     type: job.publico_alvo || "Presencial",
     postedAt: job.createdAt
       ? new Date(job.createdAt).toLocaleDateString("pt-BR")
       : "",
     description: job.descricao || "",
     link: job.link || "",
-    status: job.status,
-    tags: job.tags || [],
+    status: job.status || "ativo",
+    tags: Array.isArray(job.tags) 
+      ? job.tags 
+      : (typeof job.tags === 'string' ? job.tags.split(',').map(t => t.trim()) : []),
   };
 }
 
-export default function JobBoard({ jobs, loading }) {
+export default function JobBoard({ jobs, loading, searchQuery }) {
   const [activeJob, setActiveJob] = useState(null);
   const [activeFilters, setActiveFilters] = useState({
     especialidades: [],
     modalidades: [],
   });
+  const [sortBy, setSortBy] = useState("recent");
 
   const normalized = jobs.map(normalizeJob);
 
-  // Filtragem local por modalidade/especialidade via tags
-  const filtered = normalized.filter((job) => {
-    if (
-      activeFilters.modalidades.length > 0 &&
-      !activeFilters.modalidades.some((m) =>
-        job.type?.toLowerCase().includes(m.toLowerCase()),
-      )
-    ) {
-      return false;
-    }
-    return true;
-  });
+
+  // Filtragem e Ordenação
+  const filteredAndSorted = useMemo(() => {
+    let result = normalized.filter((job) => {
+      // 1. Pesquisa por texto (se houver searchQuery)
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesText =
+          job.title?.toLowerCase().includes(query) ||
+          job.description?.toLowerCase().includes(query) ||
+          job.tags?.some((t) => t.toLowerCase().includes(query));
+        if (!matchesText) return false;
+      }
+
+      // 2. Filtro de Modalidade
+      if (activeFilters.modalidades.length > 0) {
+        const jobTypeNormalized = job.type?.toLowerCase() || "";
+        const matchesModalidade = activeFilters.modalidades.some((m) =>
+          jobTypeNormalized.includes(m.toLowerCase()),
+        );
+        if (!matchesModalidade) return false;
+      }
+
+      // 3. Filtro de Especialidade
+      if (activeFilters.especialidades.length > 0) {
+        const matchesEspecialidade = activeFilters.especialidades.some((esp) => {
+          const e = esp.toLowerCase();
+          return (
+            job.title?.toLowerCase().includes(e) ||
+            job.description?.toLowerCase().includes(e) ||
+            job.tags?.some((t) => t.toLowerCase().includes(e))
+          );
+        });
+        if (!matchesEspecialidade) return false;
+      }
+
+      return true;
+    });
+
+    // 4. Ordenação
+    result.sort((a, b) => {
+      if (sortBy === "recent") {
+        const dateA = a.id; // Fallback se não tiver data
+        const dateB = b.id;
+        // Na falta de um timestamp real confiável em todos os objetos, usaremos o createdAt se disponível
+        const timeA = jobs.find(j => j.id === a.id)?.createdAt || 0;
+        const timeB = jobs.find(j => j.id === b.id)?.createdAt || 0;
+        return new Date(timeB) - new Date(timeA);
+      }
+      
+      if (sortBy === "relevant" && searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const aTitleMatch = a.title?.toLowerCase().includes(query);
+        const bTitleMatch = b.title?.toLowerCase().includes(query);
+        if (aTitleMatch && !bTitleMatch) return -1;
+        if (!aTitleMatch && bTitleMatch) return 1;
+      }
+      return 0;
+    });
+
+    return result;
+  }, [jobs, searchQuery, activeFilters, sortBy]);
+
+  const filtered = filteredAndSorted;
 
   useEffect(() => {
     if (filtered.length > 0) {
@@ -54,12 +110,36 @@ export default function JobBoard({ jobs, loading }) {
     }
   }, [jobs]);
 
+  const handleToggleFilter = (type, value) => {
+    setActiveFilters((prev) => {
+      const current = prev[type];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
+      return { ...prev, [type]: next };
+    });
+  };
+
   const handleClearFilters = () => {
     setActiveFilters({ especialidades: [], modalidades: [] });
-    document
-      .querySelectorAll('.filters-sidebar input[type="checkbox"]')
-      .forEach((el) => (el.checked = false));
   };
+
+  const modalidades = ["Presencial", "Híbrido", "Home Office"];
+
+  // Especialidades fixas solicitadas
+  const especialidades = [
+    "Ortopédica",
+    "Neurológica",
+    "Respiratória",
+    "Esportiva",
+    "Geriátrica",
+    "Pediátrica",
+    "Dermato-Funcional",
+    "Cardiovascular",
+    "Do Trabalho",
+    "Uroginecológica",
+    "UTI",
+  ];
 
   if (loading) {
     return (
@@ -79,14 +159,6 @@ export default function JobBoard({ jobs, loading }) {
     );
   }
 
-  const especialidades = [
-    "Neurofuncional",
-    "Traumato-Ortopédica",
-    "Cardiorrespiratória",
-    "Esportiva",
-  ];
-  const modalidades = ["Presencial", "Híbrido", "Home Office"];
-
   return (
     <main className="job-board-container">
       {/* ─── Sidebar Filtros ─── */}
@@ -100,9 +172,13 @@ export default function JobBoard({ jobs, loading }) {
 
         <div className="filter-group">
           <h3>Especialidade</h3>
-          {especialidades.map((esp, i) => (
+          {especialidades.map((esp) => (
             <label className="custom-checkbox" key={esp}>
-              <input type="checkbox" defaultChecked={i === 0} />
+              <input
+                type="checkbox"
+                checked={activeFilters.especialidades.includes(esp)}
+                onChange={() => handleToggleFilter("especialidades", esp)}
+              />
               <span className="checkmark"></span>
               {esp}
             </label>
@@ -113,7 +189,11 @@ export default function JobBoard({ jobs, loading }) {
           <h3>Modalidade</h3>
           {modalidades.map((mod) => (
             <label className="custom-checkbox" key={mod}>
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                checked={activeFilters.modalidades.includes(mod)}
+                onChange={() => handleToggleFilter("modalidades", mod)}
+              />
               <span className="checkmark"></span>
               {mod}
             </label>
@@ -130,7 +210,10 @@ export default function JobBoard({ jobs, loading }) {
           </p>
           <div className="sort-by">
             <label>Ordenar por:</label>
-            <select defaultValue="recent">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
               <option value="recent">Mais recentes</option>
               <option value="relevant">Relevância</option>
             </select>
@@ -176,6 +259,15 @@ export default function JobBoard({ jobs, loading }) {
                     <Briefcase size={16} color="var(--primary)" /> {job.type}
                   </span>
                 </div>
+                {Array.isArray(job.tags) && job.tags.length > 0 && (
+                  <div className="card-tags-row" style={{ marginTop: '12px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {job.tags.map((tag, idx) => (
+                      <span key={`${job.id}-tag-${idx}`} className="tag" style={{ fontSize: '0.75rem', padding: '3px 8px' }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {job.postedAt && (
                   <span className="time-posted">{job.postedAt}</span>
                 )}
@@ -201,17 +293,24 @@ export default function JobBoard({ jobs, loading }) {
                     {activeJob.company} &bull; {activeJob.location}
                   </div>
 
-                  <div className="card-meta">
+                  <div className="card-meta" style={{ marginBottom: '16px' }}>
                     <span className="meta-item glass-panel">
                       <Briefcase size={16} /> {activeJob.type}
                     </span>
-                    {activeJob.tags?.length > 0 &&
-                      activeJob.tags.map((tag) => (
-                        <span key={tag} className="tag">
-                          {tag}
-                        </span>
-                      ))}
                   </div>
+                  
+                  {Array.isArray(activeJob.tags) && activeJob.tags.length > 0 && (
+                    <div className="detail-tags-section" style={{ marginBottom: '24px' }}>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 600 }}>Tags:</p>
+                      <div className="detail-tags-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {activeJob.tags.map((tag, idx) => (
+                          <span key={`${activeJob.id}-detail-tag-${idx}`} className="tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="detail-actions" style={{ marginTop: "16px" }}>
                     <a

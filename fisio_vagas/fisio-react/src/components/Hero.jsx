@@ -1,7 +1,14 @@
 import React from "react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 
-export default function Hero() {
+export default function Hero({ searchQuery, setSearchQuery }) {
+  const [localQuery, setLocalQuery] = React.useState(searchQuery);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSearchQuery(localQuery);
+  };
+
   return (
     <section className="hero">
       <div className="hero-bg-shapes"></div>
@@ -16,15 +23,14 @@ export default function Hero() {
           e home care.
         </p>
 
-        <form
-          className="search-box glass-panel"
-          onSubmit={(e) => e.preventDefault()}
-        >
+        <form className="search-box glass-panel" onSubmit={handleSubmit}>
           <div className="search-input-group">
             <MagnifyingGlass size={24} color="var(--primary)" />
             <input
               type="text"
               placeholder="Cargo, especialidade ou palavra-chave..."
+              value={localQuery}
+              onChange={(e) => setLocalQuery(e.target.value)}
             />
           </div>
           <button type="submit" className="btn-search">
@@ -34,10 +40,46 @@ export default function Hero() {
 
         <div className="trending-searches">
           <span>Populares:</span>
-          <span className="tag">Neurofuncional</span>
-          <span className="tag">Traumato-Ortopédica</span>
-          <span className="tag">Home Care</span>
-          <span className="tag">UTI</span>
+          <span
+            className="tag"
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setLocalQuery("Neurofuncional");
+              setSearchQuery("Neurofuncional");
+            }}
+          >
+            Neurofuncional
+          </span>
+          <span
+            className="tag"
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setLocalQuery("Traumato-Ortopédica");
+              setSearchQuery("Traumato-Ortopédica");
+            }}
+          >
+            Traumato-Ortopédica
+          </span>
+          <span
+            className="tag"
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setLocalQuery("Home Care");
+              setSearchQuery("Home Care");
+            }}
+          >
+            Home Care
+          </span>
+          <span
+            className="tag"
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              setLocalQuery("UTI");
+              setSearchQuery("UTI");
+            }}
+          >
+            UTI
+          </span>
         </div>
       </div>
     </section>

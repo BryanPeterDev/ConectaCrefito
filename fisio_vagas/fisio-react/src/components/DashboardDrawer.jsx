@@ -48,6 +48,8 @@ export default function DashboardDrawer({
   const [modalidade, setModalidade] = useState("presencial");
   const [link, setLink] = useState("");
   const [descricao, setDescricao] = useState(DESCRICAO_TEMPLATE);
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
 
   const resetForm = () => {
     setEditingId(null);
@@ -56,6 +58,8 @@ export default function DashboardDrawer({
     setModalidade("presencial");
     setLink("");
     setDescricao(DESCRICAO_TEMPLATE);
+    setTags([]);
+    setTagInput("");
     setFormError("");
   };
 
@@ -74,7 +78,34 @@ export default function DashboardDrawer({
     setModalidade(job.publico_alvo || "presencial");
     setLink(job.link || "");
     setDescricao(job.descricao || DESCRICAO_TEMPLATE);
+    setTags(
+      Array.isArray(job.tags)
+        ? job.tags
+        : typeof job.tags === "string"
+        ? job.tags.split(",").map((t) => t.trim())
+        : []
+    );
     setIsFormOpen(true);
+    setTimeout(() => {
+      const drawerContent = document.querySelector(".dashboard-drawer-content");
+      if (drawerContent) {
+        drawerContent.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 100);
+  };
+
+  const handleAddTag = (e) => {
+    if (e && e.key !== "Enter") return;
+    if (e) e.preventDefault();
+    const val = tagInput.trim();
+    if (val && !tags.includes(val)) {
+      setTags([...tags, val]);
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setTags(tags.filter((t) => t !== tagToRemove));
   };
 
   const handlePublish = async () => {
@@ -102,13 +133,15 @@ export default function DashboardDrawer({
       const me = getCurrentUser();
       
       if (editingId) {
-        await updatePost(editingId, {
+        const payload = {
           titulo,
           descricao,
           local,
           link,
           publico_alvo: modalidade,
-        });
+        };
+        console.log("DEBUG - Editando vaga sem tags e status:", editingId, payload);
+        await updatePost(editingId, payload);
         setSuccessMsg("✅ Vaga atualizada com sucesso!");
       } else {
         await createPost({
@@ -119,7 +152,7 @@ export default function DashboardDrawer({
           link,
           publico_alvo: modalidade,
           status: "ativo",
-          tags: [],
+          tags,
         });
         setSuccessMsg("✅ Vaga publicada com sucesso!");
       }
@@ -148,7 +181,7 @@ export default function DashboardDrawer({
   };
 
   const user = getCurrentUser();
-  const activeCount = myJobs.filter((j) => j.status === "ativo").length;
+  const activeCount = Array.isArray(myJobs) ? myJobs.filter((j) => j && j.status === "ativo").length : 0;
 
   return (
     <aside className={`dashboard-drawer ${isOpen ? "open" : ""}`}>
@@ -333,6 +366,56 @@ export default function DashboardDrawer({
               />
             </div>
 
+            <div className="form-group">
+              <label>Tags (Pressione Enter para adicionar)</label>
+              <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                <input
+                  type="text"
+                  placeholder="Ex: UTI, Home Care, Pilates..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleAddTag}
+                />
+                <button
+                  className="btn-primary"
+                  type="button"
+                  style={{ width: "auto", padding: "0 16px" }}
+                  onClick={() => handleAddTag()}
+                >
+                  +
+                </button>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  flexWrap: "wrap",
+                  minHeight: "24px",
+                }}
+              >
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="tag"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "4px 8px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    {tag}
+                    <X
+                      size={12}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleRemoveTag(tag)}
+                    />
+                  </span>
+                ))}
+              </div>
+            </div>
+
             <button
               className="btn-primary w-100"
               onClick={handlePublish}
@@ -352,7 +435,7 @@ export default function DashboardDrawer({
 
         {/* ── Lista de vagas ── */}
         <div className="dashboard-jobs-list">
-          {myJobs.length === 0 && !isFormOpen && (
+          {(!Array.isArray(myJobs) || myJobs.length === 0) && !isFormOpen && (
             <p
               style={{
                 color: "var(--text-muted)",
@@ -363,9 +446,9 @@ export default function DashboardDrawer({
               Nenhuma vaga publicada ainda.
             </p>
           )}
-          {myJobs.map((job) => (
+          {Array.isArray(myJobs) && myJobs.map((job) => (
             <div
-              key={job.id}
+              key={job?.id || Math.random()}
               className="dashboard-job-card glass-panel"
               style={{ marginBottom: 0 }}
             >
@@ -391,6 +474,31 @@ export default function DashboardDrawer({
                 >
                   <MapPin size={16} /> {job.local}
                 </p>
+                {Array.isArray(job.tags) && job.tags.length > 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "4px",
+                      marginTop: "6px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {job.tags.map((t) => (
+                      <span
+                        key={t}
+                        style={{
+                          fontSize: "0.7rem",
+                          color: "var(--text-muted)",
+                          border: "1px solid var(--border-color)",
+                          padding: "1px 5px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div
                 style={{

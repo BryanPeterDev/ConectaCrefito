@@ -21,6 +21,7 @@ function App() {
   );
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Vagas públicas
   const { jobs, loading, error, refetch } = useJobs();
@@ -66,7 +67,7 @@ function App() {
         onDashboardClick={() => setIsDashboardOpen(true)}
       />
 
-      {!user && <Hero />}
+      {!user && <Hero searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
 
       {error && (
         <div style={{ textAlign: "center", padding: "24px", color: "#FE5B59" }}>
@@ -77,7 +78,7 @@ function App() {
         </div>
       )}
 
-      <JobBoard jobs={jobs} loading={loading} />
+      <JobBoard jobs={jobs} loading={loading} searchQuery={searchQuery} />
 
       {!user && (
         <AuthModal

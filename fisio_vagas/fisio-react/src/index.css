@@ -365,18 +365,21 @@ button {
 }
 
 .tag {
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid var(--border-color);
+  background: var(--primary-light);
+  border: 1px solid rgba(46, 47, 113, 0.1);
+  color: var(--primary);
   padding: 4px 12px;
   border-radius: var(--radius-pill);
-  cursor: pointer;
+  cursor: default;
   transition: var(--transition);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .tag:hover {
-  background: var(--primary-light);
+  background: var(--primary);
   border-color: var(--primary);
-  color: var(--primary-hover);
+  color: white;
 }
 
 /* =========================================
