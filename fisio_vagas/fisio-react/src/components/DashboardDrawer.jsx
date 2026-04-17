@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Plus, PencilSimple, MapPin, Trash } from '@phosphor-icons/react';
 import { createPost, deletePost, getCurrentUser } from '../services/api';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const DESCRICAO_TEMPLATE = `Sobre a vaga:
 
@@ -129,7 +131,10 @@ export default function DashboardDrawer({ isOpen, onClose, myJobs = [], onRefetc
 
                         <div className="form-group">
                             <label>Título *</label>
-                            <input type="text" placeholder="Ex: Fisioterapeuta UTI" value={titulo} onChange={e => setTitulo(e.target.value)} />
+                            <input type="text" placeholder="Ex: Fisioterapeuta UTI" value={titulo} onChange={e => setTitulo(e.target.value)} maxLength={250} />
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #888)', display: 'block', textAlign: 'right', marginTop: '4px' }}>
+                                {titulo.length}/250
+                            </span>
                         </div>
                         <div className="form-group">
                             <label>Localização *</label>
@@ -149,11 +154,15 @@ export default function DashboardDrawer({ isOpen, onClose, myJobs = [], onRefetc
                         </div>
                         <div className="form-group">
                             <label>Descrição</label>
-                            <textarea
-                                className="form-group-textarea"
-                                style={{ height: '180px' }}
+
+                            <ReactQuill
+                                theme="snow"
                                 value={descricao}
-                                onChange={e => setDescricao(e.target.value)}
+                                onChange={setDescricao} // O Quill passa a string HTML direto para o estado
+                                style={{
+                                    height: '140px', // Altura da área de digitação
+                                    marginBottom: '40px' // Margem extra porque a barra de ferramentas (toolbar) ocupa espaço
+                                }}
                             />
                         </div>
 

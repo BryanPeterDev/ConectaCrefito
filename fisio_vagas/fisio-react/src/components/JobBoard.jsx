@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Briefcase, FileText, HandPointing } from '@phosphor-icons/react';
+import "react-quill-new/dist/quill.snow.css";
 
 // Mapeia os campos da API real para o formato de exibição
 function normalizeJob(job) {
@@ -165,12 +166,11 @@ export default function JobBoard({ jobs, loading }) {
                                     </div>
                                 </div>
 
-                                <div className="detail-section">
-                                    <h3>Sobre a vaga</h3>
-                                    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', lineHeight: '1.6', color: 'var(--text-body)' }}>
-                                        {activeJob.description}
-                                    </pre>
-                                </div>
+                                <div
+                                    className="ql-editor" // <-- Adiciona essa classe mágica
+                                    style={{ lineHeight: '1.6', color: 'var(--text-body)', padding: 0 }} // padding: 0 para tirar a borda padrão do editor
+                                    dangerouslySetInnerHTML={{ __html: activeJob.description }}
+                                />
                             </>
                         ) : (
                             <div className="empty-state">
