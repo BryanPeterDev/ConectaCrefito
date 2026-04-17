@@ -7,7 +7,7 @@ import {
   Trash,
   SignOut,
 } from "@phosphor-icons/react";
-import { createPost, deletePost, getCurrentUser } from "../services/api";
+import { createPost, updatePost, deletePost, getCurrentUser } from "../services/api";
 
 const DESCRICAO_TEMPLATE = `Sobre a vaga:
 
@@ -40,6 +40,7 @@ export default function DashboardDrawer({
   const [formError, setFormError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   // Form fields (controlados)
   const [titulo, setTitulo] = useState("");
@@ -49,6 +50,7 @@ export default function DashboardDrawer({
   const [descricao, setDescricao] = useState(DESCRICAO_TEMPLATE);
 
   const resetForm = () => {
+    setEditingId(null);
     setTitulo("");
     setLocal("");
     setModalidade("presencial");
@@ -60,6 +62,18 @@ export default function DashboardDrawer({
   const handleOpenForm = () => {
     resetForm();
     setSuccessMsg("");
+    setIsFormOpen(true);
+  };
+
+  const handleEditClick = (job) => {
+    setFormError("");
+    setSuccessMsg("");
+    setEditingId(job.id);
+    setTitulo(job.titulo || "");
+    setLocal(job.local || "");
+    setModalidade(job.publico_alvo || "presencial");
+    setLink(job.link || "");
+    setDescricao(job.descricao || DESCRICAO_TEMPLATE);
     setIsFormOpen(true);
   };
 
@@ -86,25 +100,38 @@ export default function DashboardDrawer({
     setSubmitting(true);
     try {
       const me = getCurrentUser();
-      await createPost({
-        id_ofertante: me?.id,
-        titulo,
-        descricao,
-        local,
-        link,
-        publico_alvo: modalidade,
-        status: "ativo",
-        tags: [],
-      });
+      
+      if (editingId) {
+        await updatePost(editingId, {
+          titulo,
+          descricao,
+          local,
+          link,
+          publico_alvo: modalidade,
+        });
+        setSuccessMsg("✅ Vaga atualizada com sucesso!");
+      } else {
+        await createPost({
+          id_ofertante: me?.id,
+          titulo,
+          descricao,
+          local,
+          link,
+          publico_alvo: modalidade,
+          status: "ativo",
+          tags: [],
+        });
+        setSuccessMsg("✅ Vaga publicada com sucesso!");
+      }
+
       resetForm();
       setIsFormOpen(false);
-      setSuccessMsg("✅ Vaga publicada com sucesso!");
       // Pequeno delay para a API processar antes de recarregar
       setTimeout(() => {
         onRefetch?.();
       }, 500);
     } catch (err) {
-      setFormError(err.message || "Erro ao publicar. Tente novamente.");
+      setFormError(err.message || "Erro ao salvar. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -224,7 +251,7 @@ export default function DashboardDrawer({
           </button>
         )}
 
-        {/* ── Formulário de Nova Vaga ── */}
+        {/* ── Formulário de Nova Vaga / Edição ── */}
         {isFormOpen && (
           <div
             className="auth-form glass-panel active"
@@ -242,7 +269,7 @@ export default function DashboardDrawer({
                 color: "var(--text-strong)",
               }}
             >
-              Nova Vaga
+              {editingId ? "Editar Vaga" : "Nova Vaga"}
             </h3>
 
             {formError && (
@@ -311,7 +338,7 @@ export default function DashboardDrawer({
               onClick={handlePublish}
               disabled={submitting}
             >
-              {submitting ? "Publicando..." : "Confirmar Publicação"}
+              {submitting ? "Salvando..." : (editingId ? "Confirmar Edição" : "Confirmar Publicação")}
             </button>
             <button
               className="btn-ghost w-100"
@@ -386,7 +413,7 @@ export default function DashboardDrawer({
                 >
                   {job.status}
                 </span>
-                <button className="btn-ghost" title="Editar">
+                <button className="btn-ghost" title="Editar" onClick={() => handleEditClick(job)}>
                   <PencilSimple size={18} />
                 </button>
                 <button

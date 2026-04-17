@@ -5,9 +5,8 @@
 // Em produção, configure a variável de ambiente VITE_API_URL
 // ============================================================
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "";
-
 // ── Helpers internos ────────────────────────────────────────
+const BASE_URL= "";
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -221,12 +220,12 @@ export async function createPost({
 }
 
 /** Atualiza campos de uma vaga existente (requer autenticação) */
-export async function updatePost(id, fields) {
+export async function updatePost(id,titulo,descricao,local,link,publico_alvo) {
   await ensureSession();
   const res = await fetch(`${BASE_URL}/api/v1/posts/${id}`, {
     method: "PUT",
     headers: getHeaders(true),
-    body: JSON.stringify(fields),
+    body: JSON.stringify(titulo,descricao,local,link,publico_alvo),
   });
   return handleResponse(res);
 }
