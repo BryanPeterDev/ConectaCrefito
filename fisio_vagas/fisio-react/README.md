@@ -1,60 +1,54 @@
-# Conecta Crefito-11 (Job Board)
+# Conecta Crefito-11: Portal de Vagas (FisioVagas)
 
-Uma plataforma online moderna focada na conexão entre profissionais de fisioterapia e clínicas/empresas da região de Brasília-DF, gerenciada pelo Crefito-11.
+Este é o repositório frontend oficial do portal de vagas (FisioVagas) do Conselho Regional de Fisioterapia e Terapia Ocupacional da 11ª Região (Crefito-11). O frontend foi criado usando **React e Vite**, desenhado para proporcionar uma experiência fluida, moderna e focada na usabilidade (UX/UI).
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Funcionalidades Já Implementadas
 
-Este projeto foi migrado de Vanilla JS/HTML puro para uma Single Page Application (SPA) reativa e foi construído com as melhores e mais flexíveis tecnologias modernas:
+O projeto encontra-se em estágio avançado de Frontend, com a maioria das integrações já configuradas.
 
-* **React + Vite**: Engine ultrarrápido para desenvolvimento frontend reativo e build otimizada.
-* **Vanilla CSS**: Estilo desenhado com CSS moderno usando propriedades customizadas (variáveis), flexbox e grid layout para maior controle e flexibilidade, dispensando dependências lentas.
-* **Sistema de Tema Nativo**: Modo Escuro (Dark Mode) integrado fluído usando atributos `data-theme`.
-* **Phosphor Icons**: Biblioteca de vetores ultraleve para consistência visual do painel.
-* **Integração Real de API (REST)**: Totalmente conectado via Fetch a uma API real rodando Python/FastAPI (CORS nativamente contornado com Proxy do Vite + variáveis de ambiente).
+### 1. Interface Gráfica e Visual (UX/UI)
+- Visual moderno com esquema de cores profissional baseado na identidade do Crefito.
+- **Modo Escuro / Claro (Dark/Light Theme)** com chaveamento suave e persistência nas configurações do usuário.
+- Layout de dupla-aba (Split View) para navegação ágil entre a lista de vagas e os dados de uma vaga aberta na mesma tela.
+- Resumo dinâmico (tags coloridas para status da vaga, logomarca tipográfica automática).
 
-## 🌟 Funcionalidades
+### 2. Busca e Filtros Inteligentes
+- **Barra de Pesquisa Global:** Procura por palavras-chave localizadas no Título, Descrição e Tags de uma vaga.
+- **Tags de Buscas Populares:** Atalhos clicáveis na página principal (Neurofuncional, UTI, etc.).
+- **Filtros Laterais Múltiplos:** Filtragem combinada por Especialidade Fixa (Ortopédica, Pediátrica, etc.) e Modalidade (Presencial, Híbrido, Home Office).
+- **Ordenação Reativa:** Categoria de organizar lista por "Mais recentes" ou por "Relevância de Pesquisa".
 
-### Para Profissionais
-*   **Vitrine Rápida**: Listagem de todas as vagas publicadas num layout com visualização dividida (lista + detalhes em tempo real).
-*   **Filtros Customizados**: Filtragem instantânea baseada em tipo de vaga (*Presencial, Híbrido, Home Office*) e especialidade.
+### 3. Integração e Autenticação com a API (Recrutadores)
+- Login seguro por **E-mail + Código de Acesso**, dispensando senhas longas fixas.
+- Gerenciamento inteligente de sessão com validação periódica dupla (`fisio_token` no formato cookie aliado ao `fisio_refresh_token` na persistência local).
+- Redirecionamento da API no ambiente local configurado transparentemente através do Proxy Reverso do Vite.
 
-### Para Empregadores e Recrutadores
-*   **Autenticação Serverless via Código (E-mail)**: Esqueceu senha? Não tem problema, o fluxo envia diretamente um código de 6 dígitos ao E-mail, garantindo um funil de cadastro eficiente.
-*   **Painel Oculto Integrado (Drawer)**: O Dashboard desliza automaticamente sobre a tela sem necessidade de carregar páginas pesadas, focando no desempenho (SPA Navigation).
-*   **CRUD de Vagas (Integração Total)**: O recrutador pode gerenciar (criar, listar e remover) vagas de forma instantânea na API da Crefito-11. As descrições embutem um *template limpo* (Sobre, Responsabilidades e Requisitos).
+### 4. Dashboard de Minhas Vagas
+- Menu lateral exclusivo para o usuário "Ofertante/Recrutador" poder administrar as suas postagens.
+- **Criação de Vagas (POST):** Formulário interativo para publicar títulos, localização, detalhes flexíveis e sistema rápido de preenchimento de **Tags Livres**.
+- **Edição e Deleção (PUT / DELETE):** Sistema prático com botões fantasma (ghost buttons) e visualização limpa do formulário; recurso de autoscroll ao topo ativado.
 
-## 🗂 Estrutura do Projeto
+---
 
-*   `src/components/`: Todas as páginas isoladas da interface: `AuthModal` (Modais interativos de login), `DashboardDrawer` (Dashboard em gaveta flutuante), `JobBoard` (Container de Listagem) e Layouts (`Hero`, `Navbar`).
-*   `src/services/api.js`: Camada autônoma de rede responsável pelo sistema de persistência com chamadas assíncronas para a API oficial.
-*   `src/hooks/useJobs.js`: Custom Hook em React para abstração e injeção do gerenciamento de estado das vagas (*fetch, loading, error mappings*).
-*   `index.css`: Design System completo via CSS (reset clássico e escopo focado em performance nativa).
+## 🛠️ O que Falta Implementar (Pendências & Backend)
 
-## 💻 Como Rodar o Projeto (Desenvolvimento)
+Durante o desenvolvimento, algumas coisas foram limitadas ou necessitam de avanço no código do Servidor (Backend da Hmintranet/API) ou de novas funcionalidades do lado do cliente.
 
-1. Clone o repositório na sua máquina:
-   ```bash
-   git clone https://github.com/SEU-USUARIO/conecta-crefito.git
-   ```
-2. Acesse a pasta raiz do frontend (React):
-   ```bash
-   cd conecta-crefito
-   ```
-3. Instale as dependências com npm:
-   ```bash
-   npm install
-   ```
-4. Inicie o servidor ultra-rápido do Vite:
-   ```bash
-   npm run dev
-   ```
+### A. Limitações Conhecidas na Atual API (Backend)
+- **Atualização de Múltiplos Campos (Edição):** Atualmente as Rotas `PUT` que reciclam os dados da Vaga (edição) **não suportam ou ignoram a gravação da matriz de `tags` e modificações de `status`**. O frontend teve o envio dessas informações cancelado na rota de update para contornar um problema onde tentar atualizá-las resultava num bug silencioso vindo da API. Será necessário pedir que o setor de Backend permita a modificação das colunas de `tags` e `status` via comando `PUT`.
 
-*Nota: Por questões de ambiente, o Vite está roteando internamente (`/api/*`) as chamadas para a API externa via seu mecanismo próprio de Proxy (`vite.config.js`) para contornar qualquer barreira de CORS entre localhost e o servidor de Homologação.*
+### B. Próximos Passos Front-end Sugeridos
+- **Painel de Perfil do Ofertante:** Adicionar uma aba no Dashboard para que a clínica consiga editar a imagem da empresa, modificar telefones de contato fixo, entre outros dados cadastrais.
+- **Sistema Nativo de Aplicação:** Hoje o botão "Entrar em contato" aciona um Link externo ou um E-Mail genérico em formato `mailto:`. Criar a funcionalidade de "Submeter Currículo com 1 Clique" se a API futuramente receber arquivos PDF ou dados do usuário fisioterapeuta logado.
+- **Paginação / Infinite Scroll:** O sistema atual lida perfeitamente com dezenas de vagas de forma rápida, no entanto, para escalas de centenas de vagas é recomendável paginar as chamadas ao invés de buscar a lista completa (endpoint atual).
+- **Notificações em Tela (Toasts):** Substituir o feedback atual de texto (embaixo dos formulários de login/dashboards) por notificações que desaparecem sozinhas em um canto da tela (react-hot-toast / react-toastify).
+- **SEO Dinâmico (Busca do Google):** Implementar bibliotecas como *React Helmet* para alterar o metadado (título da aba e descrição pro Whatsapp/Google) dependendo de qual vaga individual estiver carregada pro usuário usando um roteamento avançado (uma página focada via ID).
 
-## 📈 Compilando para Produção
+---
 
-Quando for hospedar (Vercel, Netlify, cPanel, Servidor Apache/Nginx ou similares):
-```bash
-npm run build
-```
-O Vite irá gerar uma pasta `dist/` englobando todo o código ofuscado e minificado pronto para produção.
+## 💻 Como Rodar este Projeto
+1. **Pelo Terminal**, certifique-se de estar na pasta que contém o `package.json` desse projeto React;
+2. Instale dependências se necessário com o comando: `npm install`
+3. Execute o servidor de desenvolvimento local: `npm run dev`
+4. Acesse seu projeto através de `http://localhost:5173`
+*(As rotas para APIs de teste baterão no servidor hmintranet listado no `vite.config.js`).*
