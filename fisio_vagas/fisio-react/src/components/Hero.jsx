@@ -1,5 +1,6 @@
 import React from "react";
 import { MagnifyingGlass } from "@phosphor-icons/react";
+import FundoSite from "../assets/FundoSite.png";
 
 export default function Hero({ searchQuery, setSearchQuery }) {
   const [localQuery, setLocalQuery] = React.useState(searchQuery);
@@ -10,7 +11,10 @@ export default function Hero({ searchQuery, setSearchQuery }) {
   };
 
   return (
-    <section className="hero">
+    <section 
+      className="hero"
+      style={{ "--hero-bg-img": `url(${FundoSite})` }}
+    >
       <div className="hero-bg-shapes"></div>
       <div className="hero-content">
         <h1>
@@ -38,49 +42,6 @@ export default function Hero({ searchQuery, setSearchQuery }) {
           </button>
         </form>
 
-        <div className="trending-searches">
-          <span>Populares:</span>
-          <span
-            className="tag"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setLocalQuery("Neurofuncional");
-              setSearchQuery("Neurofuncional");
-            }}
-          >
-            Neurofuncional
-          </span>
-          <span
-            className="tag"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setLocalQuery("Traumato-Ortopédica");
-              setSearchQuery("Traumato-Ortopédica");
-            }}
-          >
-            Traumato-Ortopédica
-          </span>
-          <span
-            className="tag"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setLocalQuery("Home Care");
-              setSearchQuery("Home Care");
-            }}
-          >
-            Home Care
-          </span>
-          <span
-            className="tag"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              setLocalQuery("UTI");
-              setSearchQuery("UTI");
-            }}
-          >
-            UTI
-          </span>
-        </div>
       </div>
     </section>
   );

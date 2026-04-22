@@ -204,7 +204,7 @@ export async function createPost({
   await ensureSession();
   const res = await fetch(`${BASE_URL}/api/v1/posts`, {
     method: "POST",
-    headers: getHeaders(true),
+    headers: getHeaders(true), //Para autenticar o usuario, para funções que sao usadas apenas para quem esta logado
     body: JSON.stringify({
       id_ofertante: Number(id_ofertante),
       titulo,

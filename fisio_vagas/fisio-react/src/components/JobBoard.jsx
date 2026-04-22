@@ -7,6 +7,14 @@ import {
 } from "@phosphor-icons/react";
 
 // Mapeia os campos da API real para o formato de exibição
+function formatType(val) {
+  if (!val) return "Presencial";
+  const str = val.toLowerCase().replace(/\s+/g, "");
+  if (str === "homeoffice") return "Home Office";
+  if (str === "hibrido" || str === "híbrido") return "Híbrido";
+  return "Presencial";
+}
+
 function normalizeJob(job) {
   if (!job) return { id: Math.random() };
   return {
@@ -14,9 +22,9 @@ function normalizeJob(job) {
     title: job.titulo || "Sem título",
     company: job.ofertante?.nome || job.empresa || "Clínica/Empresa",
     location: job.local || "Local não informado",
-    type: job.publico_alvo || "Presencial",
-    postedAt: job.createdAt
-      ? new Date(job.createdAt).toLocaleDateString("pt-BR")
+    type: formatType(job.publico_alvo),
+    postedAt: (job.createdAt || job.created_at || job.data_criacao)
+      ? new Date(job.createdAt || job.created_at || job.data_criacao).toLocaleDateString("pt-BR")
       : "",
     description: job.descricao || "",
     link: job.link || "",
@@ -53,10 +61,7 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
 
       // 2. Filtro de Modalidade
       if (activeFilters.modalidades.length > 0) {
-        const jobTypeNormalized = job.type?.toLowerCase() || "";
-        const matchesModalidade = activeFilters.modalidades.some((m) =>
-          jobTypeNormalized.includes(m.toLowerCase()),
-        );
+        const matchesModalidade = activeFilters.modalidades.includes(job.type);
         if (!matchesModalidade) return false;
       }
 
@@ -133,12 +138,7 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
     "Respiratória",
     "Esportiva",
     "Geriátrica",
-    "Pediátrica",
-    "Dermato-Funcional",
-    "Cardiovascular",
-    "Do Trabalho",
-    "Uroginecológica",
-    "UTI",
+    
   ];
 
   if (loading) {
@@ -297,6 +297,11 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
                     <span className="meta-item glass-panel">
                       <Briefcase size={16} /> {activeJob.type}
                     </span>
+                    {activeJob.postedAt && (
+                      <span className="meta-item glass-panel">
+                        Publicado em: {activeJob.postedAt}
+                      </span>
+                    )}
                   </div>
                   
                   {Array.isArray(activeJob.tags) && activeJob.tags.length > 0 && (

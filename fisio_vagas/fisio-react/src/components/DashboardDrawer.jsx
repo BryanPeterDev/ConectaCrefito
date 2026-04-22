@@ -9,6 +9,11 @@ import {
 } from "@phosphor-icons/react";
 import { createPost, updatePost, deletePost, getCurrentUser } from "../services/api";
 
+const capitalizeFirst = (str) => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 const DESCRICAO_TEMPLATE = `Sobre a vaga:
 
 
@@ -323,7 +328,7 @@ export default function DashboardDrawer({
                 type="text"
                 placeholder="Ex: Fisioterapeuta UTI"
                 value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
+                onChange={(e) => setTitulo(capitalizeFirst(e.target.value))}
               />
             </div>
             <div className="form-group">
@@ -332,7 +337,7 @@ export default function DashboardDrawer({
                 type="text"
                 placeholder="Ex: Brasília, DF"
                 value={local}
-                onChange={(e) => setLocal(e.target.value)}
+                onChange={(e) => setLocal(capitalizeFirst(e.target.value))}
               />
             </div>
             <div className="form-group">
@@ -362,7 +367,7 @@ export default function DashboardDrawer({
                 className="form-group-textarea"
                 style={{ height: "180px" }}
                 value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
+                onChange={(e) => setDescricao(capitalizeFirst(e.target.value))}
               />
             </div>
 
@@ -373,7 +378,7 @@ export default function DashboardDrawer({
                   type="text"
                   placeholder="Ex: UTI, Home Care, Pilates..."
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
+                  onChange={(e) => setTagInput(capitalizeFirst(e.target.value))}
                   onKeyDown={handleAddTag}
                 />
                 <button
