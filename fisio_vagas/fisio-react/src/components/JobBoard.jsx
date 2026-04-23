@@ -4,6 +4,7 @@ import {
   Briefcase,
   FileText,
   HandPointing,
+  ShareNetwork,
 } from "@phosphor-icons/react";
 
 // Mapeia os campos da API real para o formato de exibição
@@ -11,8 +12,17 @@ function formatType(val) {
   if (!val) return "Presencial";
   const str = val.toLowerCase().replace(/\s+/g, "");
   if (str === "homeoffice") return "Home Office";
-  if (str === "hibrido" || str === "híbrido") return "Híbrido";
+  if (str === "hibrido" || str === "h\u00edbrido") return "H\u00edbrido";
   return "Presencial";
+}
+
+// Remove acentos para busca insensível a diacríticos
+function norm(str) {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 function normalizeJob(job) {
@@ -35,7 +45,7 @@ function normalizeJob(job) {
   };
 }
 
-export default function JobBoard({ jobs, loading, searchQuery }) {
+export default function JobBoard({ jobs, loading, searchQuery, locationQuery }) {
   const [activeJob, setActiveJob] = useState(null);
   const [activeFilters, setActiveFilters] = useState({
     especialidades: [],
@@ -51,12 +61,18 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
     let result = normalized.filter((job) => {
       // 1. Pesquisa por texto (se houver searchQuery)
       if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+        const query = norm(searchQuery);
         const matchesText =
-          job.title?.toLowerCase().includes(query) ||
-          job.description?.toLowerCase().includes(query) ||
-          job.tags?.some((t) => t.toLowerCase().includes(query));
+          norm(job.title).includes(query) ||
+          norm(job.description).includes(query) ||
+          job.tags?.some((t) => norm(t).includes(query));
         if (!matchesText) return false;
+      }
+
+      if (locationQuery) {
+        const locQuery = norm(locationQuery);
+        const matchesLocation = norm(job.location).includes(locQuery);
+        if (!matchesLocation) return false;
       }
 
       // 2. Filtro de Modalidade
@@ -65,14 +81,14 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
         if (!matchesModalidade) return false;
       }
 
-      // 3. Filtro de Especialidade
+      // 3. Filtro de Especialidade — busca em título, tags e descrição (sem acento)
       if (activeFilters.especialidades.length > 0) {
         const matchesEspecialidade = activeFilters.especialidades.some((esp) => {
-          const e = esp.toLowerCase();
+          const q = norm(esp);
           return (
-            job.title?.toLowerCase().includes(e) ||
-            job.description?.toLowerCase().includes(e) ||
-            job.tags?.some((t) => t.toLowerCase().includes(e))
+            norm(job.title).includes(q) ||
+            norm(job.description).includes(q) ||
+            job.tags?.some((t) => norm(t).includes(q))
           );
         });
         if (!matchesEspecialidade) return false;
@@ -103,7 +119,7 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
     });
 
     return result;
-  }, [jobs, searchQuery, activeFilters, sortBy]);
+  }, [jobs, searchQuery, locationQuery, activeFilters, sortBy]);
 
   const filtered = filteredAndSorted;
 
@@ -127,6 +143,12 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
 
   const handleClearFilters = () => {
     setActiveFilters({ especialidades: [], modalidades: [] });
+  };
+
+  const handleShare = (e, jobId) => {
+    e.stopPropagation(); // Prevent opening the details pane if clicked on the card
+    const shareUrl = `${window.location.origin}${window.location.pathname}?vaga=${jobId}`;
+    navigator.clipboard.writeText(shareUrl).catch(() => {});
   };
 
   const modalidades = ["Presencial", "Híbrido", "Home Office"];
@@ -317,7 +339,7 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
                     </div>
                   )}
 
-                  <div className="detail-actions" style={{ marginTop: "16px" }}>
+                  <div className="detail-actions" style={{ marginTop: "16px", display: "flex", alignItems: "center", gap: "12px" }}>
                     <a
                       href={
                         activeJob.link ||
@@ -333,6 +355,13 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
                     >
                       Entrar em contato
                     </a>
+                    <button 
+                      className="btn-outline-small" 
+                      onClick={(e) => handleShare(e, activeJob.id)}
+                      style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "1rem" }}
+                    >
+                      <ShareNetwork size={20} /> Compartilhar
+                    </button>
                   </div>
                 </div>
 

@@ -1,13 +1,15 @@
 import React from "react";
-import { MagnifyingGlass } from "@phosphor-icons/react";
+import { MagnifyingGlass, MapPin } from "@phosphor-icons/react";
 import FundoSite from "../assets/FundoSite.png";
 
-export default function Hero({ searchQuery, setSearchQuery }) {
-  const [localQuery, setLocalQuery] = React.useState(searchQuery);
+export default function Hero({ searchQuery, setSearchQuery, locationQuery, setLocationQuery }) {
+  const [localQuery, setLocalQuery] = React.useState(searchQuery || "");
+  const [localLocation, setLocalLocation] = React.useState(locationQuery || "");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setSearchQuery(localQuery);
+    if (setLocationQuery) setLocationQuery(localLocation);
   };
 
   return (
@@ -23,8 +25,7 @@ export default function Hero({ searchQuery, setSearchQuery }) {
         </h1>
         <p>
           A maior plataforma de oportunidade para fisioterapeutas e terapeutas
-          ocupacionai. Encontre vagas em hospitais, clínicas, clubes esportivos
-          e home care.
+          ocupacionais. Encontre vagas em clínicas, hospitais e home care alinhadas com seu perfil profissional no DF e GO.
         </p>
 
         <form className="search-box glass-panel" onSubmit={handleSubmit}>
@@ -32,13 +33,23 @@ export default function Hero({ searchQuery, setSearchQuery }) {
             <MagnifyingGlass size={24} color="var(--primary)" />
             <input
               type="text"
-              placeholder="Cargo, especialidade ou palavra-chave..."
+              placeholder="Cargo, especialidade..."
               value={localQuery}
               onChange={(e) => setLocalQuery(e.target.value)}
             />
           </div>
+          <div className="divider"></div>
+          <div className="search-input-group">
+            <MapPin size={24} color="var(--primary)" />
+            <input
+              type="text"
+              placeholder="Localização"
+              value={localLocation}
+              onChange={(e) => setLocalLocation(e.target.value)}
+            />
+          </div>
           <button type="submit" className="btn-search">
-            Buscar
+            Buscar Vagas
           </button>
         </form>
 

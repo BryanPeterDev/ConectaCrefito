@@ -2,47 +2,90 @@
    DESIGN SYSTEM & VARIABLES
    ========================================= */
 :root {
-  /* Color Palette - Premium Health Aesthetics */
-  --primary: #2e2f71;
-  /* Dark Blue */
+  /* Color Palette - Design System */
+  --surface: #f4fbf7;
+  --surface-dim: #d4dcd8;
+  --surface-bright: #f4fbf7;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #eef5f1;
+  --surface-container: #e8f0eb;
+  --surface-container-high: #e3eae6;
+  --surface-container-highest: #dde4e0;
+  --on-surface: #161d1b;
+  --on-surface-variant: #3c4a45;
+  --inverse-surface: #2b322f;
+  --inverse-on-surface: #ebf2ee;
+  --outline: #6c7a75;
+  --outline-variant: #bbcac4;
+  --surface-tint: #006b59;
+  --primary: #006b59;
+  --on-primary: #ffffff;
+  --primary-container: #32d0b0;
+  --on-primary-container: #005445;
+  --inverse-primary: #45ddbc;
+  --secondary: #56579c;
+  --on-secondary: #ffffff;
+  --secondary-container: #b1b2fd;
+  --on-secondary-container: #414285;
+  --tertiary: #914c0f;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #ffa562;
+  --on-tertiary-container: #763a00;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --primary-fixed: #69fad8;
+  --primary-fixed-dim: #45ddbc;
+  --on-primary-fixed: #002019;
+  --on-primary-fixed-variant: #005142;
+  --secondary-fixed: #e1dfff;
+  --secondary-fixed-dim: #c1c1ff;
+  --on-secondary-fixed: #111055;
+  --on-secondary-fixed-variant: #3e3f82;
+  --tertiary-fixed: #ffdcc6;
+  --tertiary-fixed-dim: #ffb784;
+  --on-tertiary-fixed: #301400;
+  --on-tertiary-fixed-variant: #713700;
+  --background: #f4fbf7;
+  --on-background: #161d1b;
+  --surface-variant: #dde4e0;
+
+  /* Legacy variable mappings to maintain existing UI structure while using new colors */
+  --brand-teal: #32D0B0;
+  --brand-deep-blue: #2E2F71;
+  --brand-coral: #FE5B59;
+  --brand-light-gray: #E1DFE1;
+
+  --primary-legacy: var(--brand-deep-blue);
   --primary-hover: #212253;
-  /* Darker Blue */
-  --primary-light: #eaeaef;
-  /* Very light blue */
-
-  --secondary: #32d0b0;
-  /* Teal */
-  --accent-1: #fe5b59;
-  --accent-2: #feab68;
-  --accent-3: #83c8cd;
-
-  --bg-main: #f8fafc;
-  --bg-surface: #ffffff;
-
-  --text-strong: #2e2f71;
-  /* Primary text mapped to primary dark blue */
-  --text-base: #334155;
-  --text-muted: #64748b;
-
-  --border-color: #e1dfe1;
-  /* Tertiary gray */
+  --primary-light: var(--surface-container);
+  
+  --bg-main: var(--background);
+  --bg-surface: var(--surface-container-lowest);
+  
+  --text-strong: var(--brand-deep-blue);
+  --text-base: var(--on-surface-variant);
+  --text-muted: var(--outline);
+  
+  --border-color: var(--brand-light-gray);
 
   /* Layout & Shadows */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem; /* DEFAULT */
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
   --radius-pill: 9999px;
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.04), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
 
   /* Typography */
-  --font-main: "Ubuntu Sans", sans-serif;
-  --font-heading: "Ubuntu Sans", sans-serif;
-  --font-brand: "Museo Sans", "Source Sans 3", sans-serif;
+  --font-main: "Inter", sans-serif;
+  --font-heading: "Manrope", sans-serif;
+  --font-brand: "Manrope", sans-serif;
 
   /* Transitions */
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -52,45 +95,142 @@
    DARK MODE
    ========================================= */
 [data-theme="dark"] {
-  --bg-main: #0f172a;
-  --bg-surface: #1e293b;
+  /* Conecta Crefito-11 Dark Theme Variables */
+  --bg-main: #1a1b41; /* Midnight Navy base */
+  --bg-surface: #24254a; /* Cards/Panels */
+  --bg-surface-high: #2d2e54; /* Modals */
 
-  --text-strong: #f8fafc;
-  --text-base: #cbd5e1;
-  --text-muted: #94a3b8;
+  --text-strong: #ffffff;
+  --text-base: #e5e2e1;
+  --text-muted: #bbcac4;
 
-  --border-color: #334155;
+  --border-color: rgba(255, 255, 255, 0.08);
 
-  --primary-light: rgba(46, 47, 113, 0.4);
+  --brand-teal: #32D0B0;
+  --primary-light: rgba(50, 208, 176, 0.15);
+  
+  --font-main: "Ubuntu", sans-serif;
+  --font-heading: "Ubuntu", sans-serif;
+  --font-brand: "Ubuntu", sans-serif;
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+  font-weight: 700;
+}
+
+[data-theme="dark"] body {
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] .btn-primary {
+  background-color: var(--brand-teal);
+  color: #000000;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  background-color: #59edcb;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .btn-search {
+  background-color: var(--brand-teal);
+  color: #000000;
+}
+
+[data-theme="dark"] .btn-search:hover {
+  background-color: #59edcb;
+}
+
+[data-theme="dark"] .btn-outline-small, 
+[data-theme="dark"] .btn-ghost {
+  border: 1px solid var(--brand-teal);
+  color: var(--brand-teal);
+  border-radius: 9999px;
+  background: transparent;
+}
+
+[data-theme="dark"] .btn-outline-small:hover, 
+[data-theme="dark"] .btn-ghost:hover {
+  background: var(--primary-light);
+  color: var(--brand-teal);
+}
+
+[data-theme="dark"] .job-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px; /* 0.5rem base radius */
+  box-shadow: none;
+}
+
+[data-theme="dark"] .job-card:hover {
+  background-color: var(--bg-surface-high);
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .job-card.active {
+  background-color: var(--bg-surface-high);
+  border-color: var(--brand-teal);
+}
+
+[data-theme="dark"] .job-card.active::before {
+  background-color: var(--brand-teal);
+}
+
+[data-theme="dark"] .company-logo {
+  background-color: var(--bg-main);
+  color: var(--brand-teal);
+}
+
+[data-theme="dark"] .meta-item {
+  background: var(--bg-main);
+  color: var(--text-base);
+}
+
+[data-theme="dark"] .meta-item i {
+  color: var(--brand-teal);
+}
+
+[data-theme="dark"] .tag {
+  background: var(--primary-light);
+  color: var(--brand-teal);
+  border-radius: 9999px;
+  border: none;
 }
 
 [data-theme="dark"] .hero {
-  background: linear-gradient(135deg, rgba(10, 15, 26, 0.9) 0%, rgba(19, 28, 45, 0.9) 100%), var(--hero-bg-img, none);
+  background: linear-gradient(135deg, rgba(26, 27, 65, 0.95) 0%, rgba(36, 37, 74, 0.9) 100%), var(--hero-bg-img, none);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
 [data-theme="dark"] .hero-bg-shapes {
-  opacity: 0.3;
+  opacity: 0.15;
 }
 
 [data-theme="dark"] .glass-panel {
-  background: rgba(30, 41, 59, 0.85);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(36, 37, 74, 0.85); /* #24254a */
+  border-color: var(--border-color);
 }
 
 [data-theme="dark"] .navbar {
-  background: rgba(15, 23, 42, 0.9);
-}
-
-[data-theme="dark"] .tag {
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(26, 27, 65, 0.9); /* #1a1b41 */
+  border-bottom: 1px solid var(--border-color);
 }
 
 [data-theme="dark"] .dashboard-drawer {
-  background: rgba(30, 41, 59, 0.98);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-main);
+  border-left: 1px solid var(--border-color);
 }
 
 /* =========================================
@@ -157,46 +297,46 @@ button {
 }
 
 .btn-primary {
-  background-color: var(--primary);
+  background-color: var(--brand-teal);
   color: white;
   padding: 10px 20px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md); /* 8px rounded corners */
   font-size: 1rem;
-  box-shadow: 0 4px 14px 0 rgba(46, 47, 113, 0.39);
+  box-shadow: 0 2px 4px rgba(50, 208, 176, 0.2);
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px 0 rgba(46, 47, 113, 0.45);
+  background-color: #2ab89b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(50, 208, 176, 0.3);
 }
 
 .btn-ghost {
   color: var(--text-base);
   padding: 10px 20px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md); /* 8px rounded corners */
 }
 
 .btn-ghost:hover {
-  background-color: var(--border-color);
-  color: var(--text-strong);
+  background-color: var(--surface-container-high);
+  color: var(--brand-deep-blue);
 }
 
 .btn-outline-small {
   padding: 6px 12px;
-  border: 1px solid var(--primary);
-  color: var(--primary);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--brand-deep-blue);
+  color: var(--brand-deep-blue);
+  border-radius: var(--radius-sm); /* 4px for small */
   font-size: 0.875rem;
   background: transparent;
 }
 
 .btn-outline-small:hover {
-  background: var(--primary-light);
+  background: var(--surface-container);
 }
 
 .btn-link {
-  color: var(--primary);
+  color: var(--brand-deep-blue);
   background: none;
   font-size: 0.875rem;
 }

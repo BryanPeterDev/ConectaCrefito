@@ -6,14 +6,28 @@ import {
   MapPin,
   Trash,
   SignOut,
+  Warning,
 } from "@phosphor-icons/react";
 import { createPost, updatePost, deletePost, getCurrentUser } from "../services/api";
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
-const capitalizeFirst = (str) => {
+const formatText = (str) => {
   if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  const lower = str.toLowerCase();
+  const prepositions = ['de', 'da', 'do', 'das', 'dos', 'em', 'na', 'no', 'nas', 'nos', 'e', 'ou', 'com', 'por', 'para', 'a', 'o', 'as', 'os'];
+  const acronyms = ['UTI', 'DF', 'GO', 'SP', 'RJ', 'MG', 'CLT', 'PJ', 'RN', 'CE', 'PE', 'PB', 'BA', 'AL', 'SE', 'PI', 'MA', 'PA', 'AP', 'AM', 'RR', 'AC', 'RO', 'TO', 'MT', 'MS', 'PR', 'SC', 'RS', 'ES'];
+  return lower.split(/\s+/).map((word, index) => {
+    if (!word) return '';
+    if (index !== 0 && prepositions.includes(word)) {
+      return word;
+    }
+    const upperWord = word.toUpperCase();
+    if (acronyms.includes(upperWord)) {
+        return upperWord;
+    }
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
 };
 
 const DESCRICAO_TEMPLATE = `<p><strong>Sobre a vaga:</strong></p><p><br></p><p><strong>Responsabilidades:</strong></p><p><br></p><p><strong>Requisitos:</strong></p>`;
@@ -41,6 +55,7 @@ export default function DashboardDrawer({
   const [deleteError, setDeleteError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, titulo }
 
   // Form fields (controlados)
   const [titulo, setTitulo] = useState("");
@@ -78,13 +93,16 @@ export default function DashboardDrawer({
     setModalidade(job.publico_alvo || "presencial");
     setLink(job.link || "");
     setDescricao(job.descricao || DESCRICAO_TEMPLATE);
-    setTags(
-      Array.isArray(job.tags)
-        ? job.tags
-        : typeof job.tags === "string"
-          ? job.tags.split(",").map((t) => t.trim())
-          : []
-    );
+    // Normalize tags robustly to always produce a clean string[].
+    let parsedTags = [];
+    if (Array.isArray(job.tags)) {
+      parsedTags = job.tags
+        .map((t) => (typeof t === 'string' ? t.trim() : String(t).trim()))
+        .filter(Boolean);
+    } else if (typeof job.tags === 'string' && job.tags.trim()) {
+      parsedTags = job.tags.split(',').map((t) => t.trim()).filter(Boolean);
+    }
+    setTags(parsedTags);
     setIsFormOpen(true);
     setTimeout(() => {
       const drawerContent = document.querySelector(".dashboard-drawer-content");
@@ -99,13 +117,14 @@ export default function DashboardDrawer({
     if (e) e.preventDefault();
     const val = tagInput.trim();
     if (val && !tags.includes(val)) {
-      setTags([...tags, val]);
+      setTags((prev) => [...prev, val]);
       setTagInput("");
     }
   };
 
-  const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter((t) => t !== tagToRemove));
+  // Use index to safely remove even if two tags share the same value.
+  const handleRemoveTag = (indexToRemove) => {
+    setTags((prev) => prev.filter((_, i) => i !== indexToRemove));
   };
 
   const handlePublish = async () => {
@@ -148,9 +167,9 @@ export default function DashboardDrawer({
           local,
           link,
           publico_alvo: modalidade,
+          tags: tags.map((t) => String(t).trim()).filter(Boolean).join(','),
         };
-        console.log("DEBUG - Editando vaga sem tags e status:", editingId, payload);
-        await updatePost(editingId, payload);
+        const result = await updatePost(editingId, payload);
         setSuccessMsg("✅ Vaga atualizada com sucesso!");
       } else {
         await createPost({
@@ -179,13 +198,20 @@ export default function DashboardDrawer({
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id, titulo) => {
+    setDeleteConfirm({ id, titulo });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
     setDeleteError("");
     try {
-      await deletePost(id);
+      await deletePost(deleteConfirm.id);
       onRefetch?.();
+      setDeleteConfirm(null);
     } catch (err) {
       setDeleteError(err.message || "Erro ao remover a vaga.");
+      setDeleteConfirm(null);
     }
   };
 
@@ -332,7 +358,7 @@ export default function DashboardDrawer({
                 type="text"
                 placeholder="Ex: Fisioterapeuta UTI"
                 value={titulo}
-                onChange={(e) => setTitulo(capitalizeFirst(e.target.value))}
+                onChange={(e) => setTitulo(formatText(e.target.value))}
               />
             </div>
             <div className="form-group">
@@ -341,7 +367,7 @@ export default function DashboardDrawer({
                 type="text"
                 placeholder="Ex: Brasília, DF"
                 value={local}
-                onChange={(e) => setLocal(capitalizeFirst(e.target.value))}
+                onChange={(e) => setLocal(formatText(e.target.value))}
               />
             </div>
             <div className="form-group">
@@ -392,7 +418,7 @@ export default function DashboardDrawer({
                   type="text"
                   placeholder="Ex: UTI, Home Care, Pilates..."
                   value={tagInput}
-                  onChange={(e) => setTagInput(capitalizeFirst(e.target.value))}
+                  onChange={(e) => setTagInput(formatText(e.target.value))}
                   onKeyDown={handleAddTag}
                 />
                 <button
@@ -412,9 +438,9 @@ export default function DashboardDrawer({
                   minHeight: "24px",
                 }}
               >
-                {tags.map((tag) => (
+                {tags.map((tag, idx) => (
                   <span
-                    key={tag}
+                    key={`${tag}-${idx}`}
                     className="tag"
                     style={{
                       display: "flex",
@@ -428,7 +454,7 @@ export default function DashboardDrawer({
                     <X
                       size={12}
                       style={{ cursor: "pointer" }}
-                      onClick={() => handleRemoveTag(tag)}
+                      onClick={() => handleRemoveTag(idx)}
                     />
                   </span>
                 ))}
@@ -546,7 +572,7 @@ export default function DashboardDrawer({
                 <button
                   className="btn-ghost"
                   title="Remover"
-                  onClick={() => handleDelete(job.id)}
+                  onClick={() => handleDelete(job.id, job.titulo)}
                 >
                   <Trash size={18} />
                 </button>
@@ -555,6 +581,38 @@ export default function DashboardDrawer({
           ))}
         </div>
       </div>
+
+      {/* Modal de Confirmação de Exclusão */}
+      {deleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px', textAlign: 'center' }}>
+            <div style={{ color: '#FE5B59', marginBottom: '16px' }}>
+              <Warning size={48} weight="fill" />
+            </div>
+            <h3 style={{ marginBottom: '12px' }}>Excluir Vaga</h3>
+            <p style={{ color: 'var(--text-base)', marginBottom: '24px', lineHeight: '1.5' }}>
+              Tem certeza que deseja excluir a vaga <strong>"{deleteConfirm.titulo}"</strong>?<br/>
+              Esta ação não pode ser desfeita.
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                className="btn-ghost" 
+                style={{ flex: 1, marginTop: 0 }} 
+                onClick={() => setDeleteConfirm(null)}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn-primary" 
+                style={{ flex: 1, backgroundColor: '#FE5B59', borderColor: '#FE5B59', color: 'white' }} 
+                onClick={confirmDelete}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

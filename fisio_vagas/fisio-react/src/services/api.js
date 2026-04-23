@@ -213,7 +213,7 @@ export async function createPost({
       link: link || "",
       publico_alvo,
       status: status ?? "ativo",
-      tags: Array.isArray(tags) ? tags : [],
+      tags: Array.isArray(tags) ? tags.join(',') : (tags || ''),
     }),
   });
   return handleResponse(res);
