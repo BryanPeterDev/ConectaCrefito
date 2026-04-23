@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import { X } from "@phosphor-icons/react";
 import { requestCode, loginWithCode, registerOfertante } from "../services/api";
 
+const capitalizeFirst = (str) => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
 const formatDoc = (val, type) => {
   let clean = val.replace(/\D/g, "");
   if (type === "pf") {
@@ -76,8 +81,8 @@ export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
     } catch (err) {
       const msg = err.message || "";
       setLoginError(
-        msg.includes("400")
-          ? "E-mail não encontrado ou inválido."
+        msg.includes("404")
+          ? "E-mail não cadastrado ou inválido."
           : msg || "Não foi possível enviar o código.",
       );
     } finally {
@@ -342,7 +347,7 @@ export default function AuthModal({ isOpen, onClose, onAuthenticated }) {
                       type="text"
                       placeholder="Seu nome ou nome da clínica"
                       value={regNome}
-                      onChange={(e) => setRegNome(e.target.value)}
+                      onChange={(e) => setRegNome(capitalizeFirst(e.target.value))}
                     />
                   </div>
                   <div className="form-group">

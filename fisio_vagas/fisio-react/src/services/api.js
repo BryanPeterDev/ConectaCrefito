@@ -5,9 +5,8 @@
 // Em produção, configure a variável de ambiente VITE_API_URL
 // ============================================================
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "";
-
 // ── Helpers internos ────────────────────────────────────────
+const BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -205,7 +204,7 @@ export async function createPost({
   await ensureSession();
   const res = await fetch(`${BASE_URL}/api/v1/posts`, {
     method: "POST",
-    headers: getHeaders(true),
+    headers: getHeaders(true), //Para autenticar o usuario, para funções que sao usadas apenas para quem esta logado
     body: JSON.stringify({
       id_ofertante: Number(id_ofertante),
       titulo,

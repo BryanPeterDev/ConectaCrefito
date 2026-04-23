@@ -7,7 +7,12 @@ import {
   Trash,
   SignOut,
 } from "@phosphor-icons/react";
-import { createPost, deletePost, getCurrentUser } from "../services/api";
+import { createPost, updatePost, deletePost, getCurrentUser } from "../services/api";
+
+const capitalizeFirst = (str) => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 
 const DESCRICAO_TEMPLATE = `Sobre a vaga:
 
@@ -40,6 +45,7 @@ export default function DashboardDrawer({
   const [formError, setFormError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   // Form fields (controlados)
   const [titulo, setTitulo] = useState("");
@@ -47,13 +53,18 @@ export default function DashboardDrawer({
   const [modalidade, setModalidade] = useState("presencial");
   const [link, setLink] = useState("");
   const [descricao, setDescricao] = useState(DESCRICAO_TEMPLATE);
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
 
   const resetForm = () => {
+    setEditingId(null);
     setTitulo("");
     setLocal("");
     setModalidade("presencial");
     setLink("");
     setDescricao(DESCRICAO_TEMPLATE);
+    setTags([]);
+    setTagInput("");
     setFormError("");
   };
 
@@ -61,6 +72,45 @@ export default function DashboardDrawer({
     resetForm();
     setSuccessMsg("");
     setIsFormOpen(true);
+  };
+
+  const handleEditClick = (job) => {
+    setFormError("");
+    setSuccessMsg("");
+    setEditingId(job.id);
+    setTitulo(job.titulo || "");
+    setLocal(job.local || "");
+    setModalidade(job.publico_alvo || "presencial");
+    setLink(job.link || "");
+    setDescricao(job.descricao || DESCRICAO_TEMPLATE);
+    setTags(
+      Array.isArray(job.tags)
+        ? job.tags
+        : typeof job.tags === "string"
+        ? job.tags.split(",").map((t) => t.trim())
+        : []
+    );
+    setIsFormOpen(true);
+    setTimeout(() => {
+      const drawerContent = document.querySelector(".dashboard-drawer-content");
+      if (drawerContent) {
+        drawerContent.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 100);
+  };
+
+  const handleAddTag = (e) => {
+    if (e && e.key !== "Enter") return;
+    if (e) e.preventDefault();
+    const val = tagInput.trim();
+    if (val && !tags.includes(val)) {
+      setTags([...tags, val]);
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setTags(tags.filter((t) => t !== tagToRemove));
   };
 
   const handlePublish = async () => {
@@ -86,25 +136,40 @@ export default function DashboardDrawer({
     setSubmitting(true);
     try {
       const me = getCurrentUser();
-      await createPost({
-        id_ofertante: me?.id,
-        titulo,
-        descricao,
-        local,
-        link,
-        publico_alvo: modalidade,
-        status: "ativo",
-        tags: [],
-      });
+      
+      if (editingId) {
+        const payload = {
+          titulo,
+          descricao,
+          local,
+          link,
+          publico_alvo: modalidade,
+        };
+        console.log("DEBUG - Editando vaga sem tags e status:", editingId, payload);
+        await updatePost(editingId, payload);
+        setSuccessMsg("✅ Vaga atualizada com sucesso!");
+      } else {
+        await createPost({
+          id_ofertante: me?.id,
+          titulo,
+          descricao,
+          local,
+          link,
+          publico_alvo: modalidade,
+          status: "ativo",
+          tags,
+        });
+        setSuccessMsg("✅ Vaga publicada com sucesso!");
+      }
+
       resetForm();
       setIsFormOpen(false);
-      setSuccessMsg("✅ Vaga publicada com sucesso!");
       // Pequeno delay para a API processar antes de recarregar
       setTimeout(() => {
         onRefetch?.();
       }, 500);
     } catch (err) {
-      setFormError(err.message || "Erro ao publicar. Tente novamente.");
+      setFormError(err.message || "Erro ao salvar. Tente novamente.");
     } finally {
       setSubmitting(false);
     }
@@ -121,7 +186,7 @@ export default function DashboardDrawer({
   };
 
   const user = getCurrentUser();
-  const activeCount = myJobs.filter((j) => j.status === "ativo").length;
+  const activeCount = Array.isArray(myJobs) ? myJobs.filter((j) => j && j.status === "ativo").length : 0;
 
   return (
     <aside className={`dashboard-drawer ${isOpen ? "open" : ""}`}>
@@ -224,7 +289,7 @@ export default function DashboardDrawer({
           </button>
         )}
 
-        {/* ── Formulário de Nova Vaga ── */}
+        {/* ── Formulário de Nova Vaga / Edição ── */}
         {isFormOpen && (
           <div
             className="auth-form glass-panel active"
@@ -242,7 +307,7 @@ export default function DashboardDrawer({
                 color: "var(--text-strong)",
               }}
             >
-              Nova Vaga
+              {editingId ? "Editar Vaga" : "Nova Vaga"}
             </h3>
 
             {formError && (
@@ -263,7 +328,7 @@ export default function DashboardDrawer({
                 type="text"
                 placeholder="Ex: Fisioterapeuta UTI"
                 value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
+                onChange={(e) => setTitulo(capitalizeFirst(e.target.value))}
               />
             </div>
             <div className="form-group">
@@ -272,7 +337,7 @@ export default function DashboardDrawer({
                 type="text"
                 placeholder="Ex: Brasília, DF"
                 value={local}
-                onChange={(e) => setLocal(e.target.value)}
+                onChange={(e) => setLocal(capitalizeFirst(e.target.value))}
               />
             </div>
             <div className="form-group">
@@ -302,8 +367,58 @@ export default function DashboardDrawer({
                 className="form-group-textarea"
                 style={{ height: "180px" }}
                 value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
+                onChange={(e) => setDescricao(capitalizeFirst(e.target.value))}
               />
+            </div>
+
+            <div className="form-group">
+              <label>Tags (Pressione Enter para adicionar)</label>
+              <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                <input
+                  type="text"
+                  placeholder="Ex: UTI, Home Care, Pilates..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(capitalizeFirst(e.target.value))}
+                  onKeyDown={handleAddTag}
+                />
+                <button
+                  className="btn-primary"
+                  type="button"
+                  style={{ width: "auto", padding: "0 16px" }}
+                  onClick={() => handleAddTag()}
+                >
+                  +
+                </button>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  flexWrap: "wrap",
+                  minHeight: "24px",
+                }}
+              >
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="tag"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "4px 8px",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    {tag}
+                    <X
+                      size={12}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleRemoveTag(tag)}
+                    />
+                  </span>
+                ))}
+              </div>
             </div>
 
             <button
@@ -311,7 +426,7 @@ export default function DashboardDrawer({
               onClick={handlePublish}
               disabled={submitting}
             >
-              {submitting ? "Publicando..." : "Confirmar Publicação"}
+              {submitting ? "Salvando..." : (editingId ? "Confirmar Edição" : "Confirmar Publicação")}
             </button>
             <button
               className="btn-ghost w-100"
@@ -325,7 +440,7 @@ export default function DashboardDrawer({
 
         {/* ── Lista de vagas ── */}
         <div className="dashboard-jobs-list">
-          {myJobs.length === 0 && !isFormOpen && (
+          {(!Array.isArray(myJobs) || myJobs.length === 0) && !isFormOpen && (
             <p
               style={{
                 color: "var(--text-muted)",
@@ -336,9 +451,9 @@ export default function DashboardDrawer({
               Nenhuma vaga publicada ainda.
             </p>
           )}
-          {myJobs.map((job) => (
+          {Array.isArray(myJobs) && myJobs.map((job) => (
             <div
-              key={job.id}
+              key={job?.id || Math.random()}
               className="dashboard-job-card glass-panel"
               style={{ marginBottom: 0 }}
             >
@@ -364,6 +479,31 @@ export default function DashboardDrawer({
                 >
                   <MapPin size={16} /> {job.local}
                 </p>
+                {Array.isArray(job.tags) && job.tags.length > 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "4px",
+                      marginTop: "6px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {job.tags.map((t) => (
+                      <span
+                        key={t}
+                        style={{
+                          fontSize: "0.7rem",
+                          color: "var(--text-muted)",
+                          border: "1px solid var(--border-color)",
+                          padding: "1px 5px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div
                 style={{
@@ -386,7 +526,7 @@ export default function DashboardDrawer({
                 >
                   {job.status}
                 </span>
-                <button className="btn-ghost" title="Editar">
+                <button className="btn-ghost" title="Editar" onClick={() => handleEditClick(job)}>
                   <PencilSimple size={18} />
                 </button>
                 <button
