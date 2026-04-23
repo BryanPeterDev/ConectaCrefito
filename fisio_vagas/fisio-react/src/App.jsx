@@ -67,7 +67,7 @@ function App() {
         onDashboardClick={() => setIsDashboardOpen(true)}
       />
 
-      {!user && <Hero searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
+      <Hero searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {error && (
         <div style={{ textAlign: "center", padding: "24px", color: "#FE5B59" }}>

@@ -8,20 +8,15 @@ import {
   SignOut,
 } from "@phosphor-icons/react";
 import { createPost, updatePost, deletePost, getCurrentUser } from "../services/api";
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const capitalizeFirst = (str) => {
   if (!str) return str;
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-const DESCRICAO_TEMPLATE = `Sobre a vaga:
-
-
-Responsabilidades:
-
-
-Requisitos:
-`;
+const DESCRICAO_TEMPLATE = `<p><strong>Sobre a vaga:</strong></p><p><br></p><p><strong>Responsabilidades:</strong></p><p><br></p><p><strong>Requisitos:</strong></p>`;
 
 const SELECT_STYLE = {
   width: "100%",
@@ -87,8 +82,8 @@ export default function DashboardDrawer({
       Array.isArray(job.tags)
         ? job.tags
         : typeof job.tags === "string"
-        ? job.tags.split(",").map((t) => t.trim())
-        : []
+          ? job.tags.split(",").map((t) => t.trim())
+          : []
     );
     setIsFormOpen(true);
     setTimeout(() => {
@@ -118,7 +113,7 @@ export default function DashboardDrawer({
       setFormError("Título e localização são obrigatórios.");
       return;
     }
-    if (!descricao.trim() || descricao.trim() === DESCRICAO_TEMPLATE.trim()) {
+    if (!descricao.trim() || descricao.trim() === DESCRICAO_TEMPLATE.trim() || descricao.trim() === '<p><br></p>') {
       setFormError(
         "A descrição da vaga é obrigatória e precisa ser preenchida.",
       );
@@ -137,10 +132,19 @@ export default function DashboardDrawer({
     try {
       const me = getCurrentUser();
       
+      // Limpeza do HTML para o banco de dados ficar mais legível
+      let htmlFormatado = descricao.replace(/&nbsp;/g, ' ');
+      htmlFormatado = htmlFormatado.replace(/<\/p>/g, '</p>\n');
+      htmlFormatado = htmlFormatado.replace(/<ul>/g, '<ul>\n');
+      htmlFormatado = htmlFormatado.replace(/<\/ul>/g, '</ul>\n');
+      htmlFormatado = htmlFormatado.replace(/<li>/g, '  <li>');
+      htmlFormatado = htmlFormatado.replace(/<\/li>/g, '</li>\n');
+      htmlFormatado = htmlFormatado.trim();
+
       if (editingId) {
         const payload = {
           titulo,
-          descricao,
+          descricao: htmlFormatado,
           local,
           link,
           publico_alvo: modalidade,
@@ -152,7 +156,7 @@ export default function DashboardDrawer({
         await createPost({
           id_ofertante: me?.id,
           titulo,
-          descricao,
+          descricao: htmlFormatado,
           local,
           link,
           publico_alvo: modalidade,
@@ -363,11 +367,21 @@ export default function DashboardDrawer({
             </div>
             <div className="form-group">
               <label>Descrição</label>
-              <textarea
-                className="form-group-textarea"
-                style={{ height: "180px" }}
+              <ReactQuill
+                theme="snow"
                 value={descricao}
-                onChange={(e) => setDescricao(capitalizeFirst(e.target.value))}
+                onChange={setDescricao}
+                modules={{
+                  toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    [{ 'indent': '-1' }, { 'indent': '+1' }],
+                    [{ 'align': [] }],
+                    ['link'],
+                    ['clean']
+                  ],
+                }}
               />
             </div>
 
