@@ -3,11 +3,15 @@
    ========================================= */
 :root {
   /* Color Palette - Premium Health Aesthetics */
-  --primary: #2e2f71; /* Dark Blue */
-  --primary-hover: #212253; /* Darker Blue */
-  --primary-light: #eaeaef; /* Very light blue */
+  --primary: #2e2f71;
+  /* Dark Blue */
+  --primary-hover: #212253;
+  /* Darker Blue */
+  --primary-light: #eaeaef;
+  /* Very light blue */
 
-  --secondary: #32d0b0; /* Teal */
+  --secondary: #32d0b0;
+  /* Teal */
   --accent-1: #fe5b59;
   --accent-2: #feab68;
   --accent-3: #83c8cd;
@@ -15,11 +19,13 @@
   --bg-main: #f8fafc;
   --bg-surface: #ffffff;
 
-  --text-strong: #2e2f71; /* Primary text mapped to primary dark blue */
+  --text-strong: #2e2f71;
+  /* Primary text mapped to primary dark blue */
   --text-base: #334155;
   --text-muted: #64748b;
 
-  --border-color: #e1dfe1; /* Tertiary gray */
+  --border-color: #e1dfe1;
+  /* Tertiary gray */
 
   /* Layout & Shadows */
   --radius-sm: 8px;
@@ -194,6 +200,7 @@ button {
   background: none;
   font-size: 0.875rem;
 }
+
 .btn-link:hover {
   text-decoration: underline;
 }
@@ -274,16 +281,12 @@ button {
   z-index: 0;
   opacity: 0.6;
   background-image:
-    radial-gradient(
-      circle at 15% 50%,
+    radial-gradient(circle at 15% 50%,
       rgba(46, 47, 113, 0.15),
-      transparent 25%
-    ),
-    radial-gradient(
-      circle at 85% 30%,
+      transparent 25%),
+    radial-gradient(circle at 85% 30%,
       rgba(50, 208, 176, 0.15),
-      transparent 25%
-    );
+      transparent 25%);
 }
 
 .hero-content {
@@ -407,7 +410,8 @@ button {
   padding: 24px;
   align-self: start;
   position: sticky;
-  top: 100px; /* Accounts for navbar */
+  top: 100px;
+  /* Accounts for navbar */
 }
 
 .filter-header {
@@ -458,11 +462,11 @@ button {
   transition: var(--transition);
 }
 
-.custom-checkbox:hover input ~ .checkmark {
+.custom-checkbox:hover input~.checkmark {
   border-color: var(--primary);
 }
 
-.custom-checkbox input:checked ~ .checkmark {
+.custom-checkbox input:checked~.checkmark {
   background-color: var(--primary);
   border-color: var(--primary);
 }
@@ -477,7 +481,7 @@ button {
   transform: rotate(45deg);
 }
 
-.custom-checkbox input:checked ~ .checkmark:after {
+.custom-checkbox input:checked~.checkmark:after {
   display: block;
 }
 
@@ -663,6 +667,7 @@ button {
 .job-details-pane::-webkit-scrollbar {
   width: 8px;
 }
+
 .job-details-pane::-webkit-scrollbar-thumb {
   background-color: var(--border-color);
   border-radius: 4px;
@@ -743,6 +748,7 @@ button {
   .job-board-container {
     grid-template-columns: 1fr;
   }
+
   .filters-sidebar {
     position: static;
     display: flex;
@@ -750,15 +756,19 @@ button {
     gap: 24px;
     padding: 16px;
   }
+
   .filter-group {
     min-width: 200px;
     margin-bottom: 0;
   }
+
   .split-view {
     grid-template-columns: 1fr;
   }
+
   .job-details-pane {
-    display: none; /* In practical app, opens as a modal or secondary page on mobile */
+    display: none;
+    /* In practical app, opens as a modal or secondary page on mobile */
   }
 }
 
@@ -766,17 +776,21 @@ button {
   .nav-links {
     display: none;
   }
+
   .hero {
     padding: 40px 16px;
   }
+
   .search-box {
     flex-direction: column;
     border-radius: var(--radius-md);
   }
+
   .divider {
     width: 100%;
     height: 1px;
   }
+
   .btn-search {
     width: 100%;
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
@@ -802,11 +816,13 @@ button {
   visibility: visible;
   transition: var(--transition);
 }
+
 .modal-overlay.hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
+
 .modal-content {
   background: var(--bg-surface);
   width: 100%;
@@ -818,9 +834,11 @@ button {
   transform: translateY(0);
   transition: var(--transition);
 }
+
 .modal-overlay.hidden .modal-content {
   transform: translateY(20px);
 }
+
 .modal-close {
   position: absolute;
   top: 16px;
@@ -828,6 +846,7 @@ button {
   font-size: 1.5rem;
   color: var(--text-muted);
 }
+
 .modal-close:hover {
   color: var(--text-strong);
 }
@@ -838,26 +857,32 @@ button {
   margin-top: 16px;
   border-bottom: 1px solid var(--border-color);
 }
+
 .auth-tab {
   padding: 8px 16px;
   font-weight: 600;
   color: var(--text-muted);
   border-bottom: 2px solid transparent;
 }
+
 .auth-tab.active {
   color: var(--primary);
   border-bottom-color: var(--primary);
 }
+
 .auth-form {
   display: none;
   margin-top: 24px;
 }
+
 .auth-form.active {
   display: block;
 }
+
 .form-group {
   margin-bottom: 16px;
 }
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
@@ -865,6 +890,7 @@ button {
   color: var(--text-base);
   font-weight: 500;
 }
+
 .form-group input {
   width: 100%;
   padding: 12px 16px;
@@ -874,14 +900,17 @@ button {
   color: var(--text-strong);
   transition: var(--transition);
 }
+
 .form-group input:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-light);
 }
+
 .w-100 {
   width: 100%;
 }
+
 .hidden {
   display: none !important;
 }
@@ -898,6 +927,7 @@ button {
   resize: vertical;
   min-height: 80px;
 }
+
 .form-group-textarea:focus {
   outline: none;
   border-color: var(--primary);
@@ -921,9 +951,11 @@ button {
   display: flex;
   flex-direction: column;
 }
+
 .dashboard-drawer.open {
   right: 0;
 }
+
 .dashboard-drawer-header {
   padding: 24px;
   border-bottom: 1px solid var(--border-color);
@@ -931,6 +963,7 @@ button {
   justify-content: space-between;
   align-items: center;
 }
+
 .dashboard-drawer-content {
   padding: 24px;
   overflow-y: auto;
@@ -941,25 +974,30 @@ button {
   display: grid;
   gap: 16px;
 }
+
 .stat-card {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .stat-card h4 {
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
 .stat-card span {
   font-size: 2rem;
   font-weight: 700;
   color: var(--primary);
 }
+
 .dashboard-jobs-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
+
 .dashboard-job-card {
   background: var(--bg-main);
   border: 1px solid var(--border-color);
@@ -968,4 +1006,77 @@ button {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* =========================================
+   REACT QUILL OVERRIDES
+   ========================================= */
+.quill {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-main);
+  border-radius: var(--radius-sm);
+  margin-bottom: 24px;
+}
+
+.ql-toolbar.ql-snow {
+  border: 1px solid var(--border-color) !important;
+  border-bottom: none !important;
+  border-top-left-radius: var(--radius-sm);
+  border-top-right-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+}
+
+.ql-container.ql-snow {
+  border: 1px solid var(--border-color) !important;
+  border-bottom-left-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+  height: 200px !important;
+  font-family: var(--font-main) !important;
+  font-size: 1rem !important;
+}
+
+.ql-editor {
+  color: var(--text-base);
+}
+
+.ql-editor p {
+  margin-bottom: 1em !important;
+}
+
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3 {
+  margin-bottom: 0.5em !important;
+  color: var(--text-strong);
+}
+
+.ql-editor ul,
+.ql-editor ol {
+  padding-left: 1.5em !important;
+  margin-bottom: 1em !important;
+}
+
+.ql-editor strong,
+.ql-editor b {
+  font-weight: bold !important;
+}
+
+/* Fix dark mode toolbar icons */
+[data-theme="dark"] .ql-snow .ql-stroke {
+  stroke: var(--text-base) !important;
+}
+
+[data-theme="dark"] .ql-snow .ql-fill,
+[data-theme="dark"] .ql-snow .ql-stroke.ql-fill {
+  fill: var(--text-base) !important;
+}
+
+[data-theme="dark"] .ql-snow .ql-picker {
+  color: var(--text-base) !important;
+}
+
+[data-theme="dark"] .ql-snow .ql-picker-options {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-color) !important;
 }

@@ -338,16 +338,15 @@ export default function JobBoard({ jobs, loading, searchQuery }) {
 
                 <div className="detail-section">
                   <h3>Sobre a vaga</h3>
-                  <pre
+                  <div
+                    className="job-description-content"
                     style={{
-                      whiteSpace: "pre-wrap",
                       fontFamily: "inherit",
                       lineHeight: "1.6",
                       color: "var(--text-body)",
                     }}
-                  >
-                    {activeJob.description}
-                  </pre>
+                    dangerouslySetInnerHTML={{ __html: activeJob.description }}
+                  />
                 </div>
               </>
             ) : (
