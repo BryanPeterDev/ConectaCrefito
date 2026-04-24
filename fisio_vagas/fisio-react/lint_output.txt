@@ -1,0 +1,16 @@
+ESLint: 5 errors, 2 warnings in 2 files
+═══════════════════════════════════════
+Top rules:
+  no-unused-vars (2x)
+  no-undef (2x)
+  react-hooks/exhaustive-deps (2x)
+  react-hooks/set-state-in-effect (1x)
+
+Top files:
+  src/components/JobBoard.jsx (5 issues)
+    no-unused-vars (2)
+    react-hooks/exhaustive-deps (2)
+    react-hooks/set-state-in-effect (1)
+  src/components/Hero.jsx (2 issues)
+    no-undef (2)
+[full output: ~/.local/share/rtk/tee/1777052922_lint.log]

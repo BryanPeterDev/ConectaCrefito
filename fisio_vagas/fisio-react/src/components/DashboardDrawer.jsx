@@ -24,13 +24,13 @@ const formatText = (str) => {
     }
     const upperWord = word.toUpperCase();
     if (acronyms.includes(upperWord)) {
-        return upperWord;
+      return upperWord;
     }
     return word.charAt(0).toUpperCase() + word.slice(1);
   }).join(' ');
 };
 
-const DESCRICAO_TEMPLATE = `<p><strong>Sobre a vaga:</strong></p><p><br></p><p><strong>Responsabilidades:</strong></p><p><br></p><p><strong>Requisitos:</strong></p>`;
+const DESCRICAO_TEMPLATE = ``;
 
 const SELECT_STYLE = {
   width: "100%",
@@ -62,7 +62,7 @@ export default function DashboardDrawer({
   const [local, setLocal] = useState("");
   const [modalidade, setModalidade] = useState("presencial");
   const [link, setLink] = useState("");
-  const [descricao, setDescricao] = useState(DESCRICAO_TEMPLATE);
+  const [descricao, setDescricao] = useState("");
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
 
@@ -72,7 +72,7 @@ export default function DashboardDrawer({
     setLocal("");
     setModalidade("presencial");
     setLink("");
-    setDescricao(DESCRICAO_TEMPLATE);
+    setDescricao("");
     setTags([]);
     setTagInput("");
     setFormError("");
@@ -92,7 +92,7 @@ export default function DashboardDrawer({
     setLocal(job.local || "");
     setModalidade(job.publico_alvo || "presencial");
     setLink(job.link || "");
-    setDescricao(job.descricao || DESCRICAO_TEMPLATE);
+    setDescricao(job.descricao || "");
     // Normalize tags robustly to always produce a clean string[].
     let parsedTags = [];
     if (Array.isArray(job.tags)) {
@@ -132,7 +132,7 @@ export default function DashboardDrawer({
       setFormError("Título e localização são obrigatórios.");
       return;
     }
-    if (!descricao.trim() || descricao.trim() === DESCRICAO_TEMPLATE.trim() || descricao.trim() === '<p><br></p>') {
+    if (!descricao.trim() || descricao.trim() === '<p><br></p>') {
       setFormError(
         "A descrição da vaga é obrigatória e precisa ser preenchida.",
       );
@@ -150,7 +150,7 @@ export default function DashboardDrawer({
     setSubmitting(true);
     try {
       const me = getCurrentUser();
-      
+
       // Limpeza do HTML para o banco de dados ficar mais legível
       let htmlFormatado = descricao.replace(/&nbsp;/g, ' ');
       htmlFormatado = htmlFormatado.replace(/<\/p>/g, '</p>\n');
@@ -169,7 +169,7 @@ export default function DashboardDrawer({
           publico_alvo: modalidade,
           tags: tags.map((t) => String(t).trim()).filter(Boolean).join(','),
         };
-        const result = await updatePost(editingId, payload);
+        await updatePost(editingId, payload);
         setSuccessMsg("✅ Vaga atualizada com sucesso!");
       } else {
         await createPost({
@@ -471,6 +471,7 @@ export default function DashboardDrawer({
             <button
               className="btn-ghost w-100"
               onClick={() => setIsFormOpen(false)}
+              disabled={submitting}
               style={{ marginTop: "8px" }}
             >
               Cancelar
@@ -591,23 +592,25 @@ export default function DashboardDrawer({
             </div>
             <h3 style={{ marginBottom: '12px' }}>Excluir Vaga</h3>
             <p style={{ color: 'var(--text-base)', marginBottom: '24px', lineHeight: '1.5' }}>
-              Tem certeza que deseja excluir a vaga <strong>"{deleteConfirm.titulo}"</strong>?<br/>
+              Tem certeza que deseja excluir a vaga <strong>"{deleteConfirm.titulo}"</strong>?<br />
               Esta ação não pode ser desfeita.
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button 
-                className="btn-ghost" 
-                style={{ flex: 1, marginTop: 0 }} 
+              <button
+                className="btn-ghost"
+                style={{ flex: 1, marginTop: 0 }}
                 onClick={() => setDeleteConfirm(null)}
+                disabled={submitting}
               >
                 Cancelar
               </button>
-              <button 
-                className="btn-primary" 
-                style={{ flex: 1, backgroundColor: '#FE5B59', borderColor: '#FE5B59', color: 'white' }} 
+              <button
+                className="btn-primary"
+                style={{ flex: 1, backgroundColor: '#FE5B59', borderColor: '#FE5B59', color: 'white' }}
                 onClick={confirmDelete}
+                disabled={submitting}
               >
-                Excluir
+                {submitting ? "Excluindo..." : "Excluir"}
               </button>
             </div>
           </div>

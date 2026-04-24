@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   MapPin,
   Briefcase,
-  FileText,
   HandPointing,
   ShareNetwork,
 } from "@phosphor-icons/react";
@@ -46,14 +45,14 @@ function normalizeJob(job) {
 }
 
 export default function JobBoard({ jobs, loading, searchQuery, locationQuery }) {
-  const [activeJob, setActiveJob] = useState(null);
+  const [activeJobId, setActiveJobId] = useState(null);
   const [activeFilters, setActiveFilters] = useState({
     especialidades: [],
     modalidades: [],
   });
   const [sortBy, setSortBy] = useState("recent");
 
-  const normalized = jobs.map(normalizeJob);
+  const normalized = useMemo(() => jobs.map(normalizeJob), [jobs]);
 
 
   // Filtragem e Ordenação
@@ -100,12 +99,10 @@ export default function JobBoard({ jobs, loading, searchQuery, locationQuery }) 
     // 4. Ordenação
     result.sort((a, b) => {
       if (sortBy === "recent") {
-        const dateA = a.id; // Fallback se não tiver data
-        const dateB = b.id;
         // Na falta de um timestamp real confiável em todos os objetos, usaremos o createdAt se disponível
         const timeA = jobs.find(j => j.id === a.id)?.createdAt || 0;
         const timeB = jobs.find(j => j.id === b.id)?.createdAt || 0;
-        return new Date(timeB) - new Date(timeA);
+        return new Date(timeB).getTime() - new Date(timeA).getTime();
       }
       
       if (sortBy === "relevant" && searchQuery) {
@@ -119,17 +116,15 @@ export default function JobBoard({ jobs, loading, searchQuery, locationQuery }) 
     });
 
     return result;
-  }, [jobs, searchQuery, locationQuery, activeFilters, sortBy]);
+  }, [normalized, searchQuery, locationQuery, activeFilters, sortBy, jobs]);
 
   const filtered = filteredAndSorted;
 
-  useEffect(() => {
-    if (filtered.length > 0) {
-      setActiveJob(
-        (prev) => filtered.find((j) => j.id === prev?.id) || filtered[0],
-      );
-    }
-  }, [jobs]);
+  const activeJob = useMemo(() => {
+    if (filtered.length === 0) return null;
+    const selected = filtered.find(j => j.id === activeJobId);
+    return selected || filtered[0];
+  }, [filtered, activeJobId]);
 
   const handleToggleFilter = (type, value) => {
     setActiveFilters((prev) => {
@@ -145,10 +140,19 @@ export default function JobBoard({ jobs, loading, searchQuery, locationQuery }) 
     setActiveFilters({ especialidades: [], modalidades: [] });
   };
 
+  const [sharing, setSharing] = useState(false);
+
   const handleShare = (e, jobId) => {
-    e.stopPropagation(); // Prevent opening the details pane if clicked on the card
+    e.stopPropagation();
+    if (sharing) return;
+    
+    setSharing(true);
     const shareUrl = `${window.location.origin}${window.location.pathname}?vaga=${jobId}`;
-    navigator.clipboard.writeText(shareUrl).catch(() => {});
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setTimeout(() => setSharing(false), 2000);
+    }).catch(() => {
+      setSharing(false);
+    });
   };
 
   const modalidades = ["Presencial", "Híbrido", "Home Office"];
@@ -260,7 +264,7 @@ export default function JobBoard({ jobs, loading, searchQuery, locationQuery }) 
               <div
                 key={job.id}
                 className={`job-card ${activeJob?.id === job.id ? "active" : ""}`}
-                onClick={() => setActiveJob(job)}
+                onClick={() => setActiveJobId(job.id)}
               >
                 <div className="card-header">
                   <div style={{ display: "flex", gap: "16px" }}>
@@ -358,9 +362,10 @@ export default function JobBoard({ jobs, loading, searchQuery, locationQuery }) 
                     <button 
                       className="btn-outline-small" 
                       onClick={(e) => handleShare(e, activeJob.id)}
+                      disabled={sharing}
                       style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px", fontSize: "1rem" }}
                     >
-                      <ShareNetwork size={20} /> Compartilhar
+                      <ShareNetwork size={20} /> {sharing ? "Copiado!" : "Compartilhar"}
                     </button>
                   </div>
                 </div>

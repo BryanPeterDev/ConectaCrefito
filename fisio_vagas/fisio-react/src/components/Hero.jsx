@@ -2,7 +2,7 @@ import React from "react";
 import { MagnifyingGlass, MapPin } from "@phosphor-icons/react";
 import FundoSite from "../assets/FundoSite.png";
 
-export default function Hero({ searchQuery, setSearchQuery, locationQuery, setLocationQuery }) {
+export default function Hero({ searchQuery, setSearchQuery, locationQuery, setLocationQuery, loading }) {
   const [localQuery, setLocalQuery] = React.useState(searchQuery || "");
   const [localLocation, setLocalLocation] = React.useState(locationQuery || "");
 
@@ -48,8 +48,8 @@ export default function Hero({ searchQuery, setSearchQuery, locationQuery, setLo
               onChange={(e) => setLocalLocation(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn-search">
-            Buscar Vagas
+          <button type="submit" className="btn-search" disabled={loading}>
+            {loading ? "Buscando..." : "Buscar Vagas"}
           </button>
         </form>
 

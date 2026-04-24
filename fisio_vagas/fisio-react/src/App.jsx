@@ -73,13 +73,14 @@ function App() {
         setSearchQuery={setSearchQuery} 
         locationQuery={locationQuery}
         setLocationQuery={setLocationQuery}
+        loading={loading}
       />
 
       {error && (
         <div style={{ textAlign: "center", padding: "24px", color: "#FE5B59" }}>
           Erro ao carregar vagas: {error}.{" "}
-          <button onClick={refetch} className="btn-link">
-            Tentar novamente
+          <button onClick={refetch} className="btn-link" disabled={loading}>
+            {loading ? "Tentando novamente..." : "Tentar novamente"}
           </button>
         </div>
       )}

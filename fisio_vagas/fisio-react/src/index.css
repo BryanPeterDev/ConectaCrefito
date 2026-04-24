@@ -296,6 +296,11 @@ button {
   gap: 8px;
 }
 
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background-color: var(--brand-teal);
   color: white;

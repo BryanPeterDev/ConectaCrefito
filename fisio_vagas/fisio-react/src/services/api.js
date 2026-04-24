@@ -50,7 +50,7 @@ async function ensureSession() {
       localStorage.setItem("fisio_refresh_token", data.refresh_token);
   } catch (e) {
     logout();
-    throw new Error("Sessão expirada. Faça login novamente.");
+    throw new Error("Sessão expirada. Faça login novamente: " + e.message);
   }
 }
 
@@ -104,7 +104,7 @@ export function logout() {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ refresh_token: refreshToken }),
-    }).catch(() => {});
+    }).catch(() => { });
   }
   // Limpa tudo localmente
   deleteCookie("fisio_token");
@@ -213,7 +213,7 @@ export async function createPost({
       link: link || "",
       publico_alvo,
       status: status ?? "ativo",
-      tags: Array.isArray(tags) ? tags.join(',') : (tags || ''),
+      tags: tags,
     }),
   });
   return handleResponse(res);
