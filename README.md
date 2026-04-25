@@ -51,4 +51,4 @@ Durante o desenvolvimento, algumas coisas foram limitadas ou necessitam de avan�
 2. Instale dependências se necessário com o comando: `npm install`
 3. Execute o servidor de desenvolvimento local: `npm run dev`
 4. Acesse seu projeto através de `http://localhost:5173`
-
+*(As rotas para APIs de teste baterão no servidor hmintranet listado no `vite.config.js`).*
